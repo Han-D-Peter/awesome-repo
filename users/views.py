@@ -21,17 +21,21 @@ class UsersViewSet(ModelViewSet):
     serializer_class = UserSerializer
 
     def get_permissions(self):
-        permission_classes = []
+
         if self.action == "list":
             permission_classes = [IsAdminUser]
-        elif self.action == "create" or self.action == "retrieve" or self.action == "favs":
+        elif (
+            self.action == "create"
+            or self.action == "retrieve"
+            or self.action == "favs"
+        ):
             permission_classes = [AllowAny]
         else:
-            permission_classes = [IsSelf | IsAdminUser]
+            permission_classes = [IsSelf]
         return [permission() for permission in permission_classes]
 
     @action(detail=False, methods=["post"])
-    def login(request):
+    def login(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
         if not username or not password:
@@ -41,7 +45,7 @@ class UsersViewSet(ModelViewSet):
             encoded_jwt = jwt.encode(
                 {"pk": user.pk}, settings.SECRET_KEY, algorithm="HS256"
             )
-            return Response(data={'token': encoded_jwt, "id": user.pk})
+            return Response(data={"token": encoded_jwt, "id": user.pk})
         else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
