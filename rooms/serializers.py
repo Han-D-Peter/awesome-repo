@@ -1,12 +1,17 @@
 from rest_framework import serializers
 from users.serializers import RelatedUserSerializer
-from .models import Room
+from .models import Room, Photo
 
+class PhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Photo
+        exclude=("room",)
 
 class RoomSerializer(serializers.ModelSerializer):
 
-    user = RelatedUserSerializer(read_only=True)
     is_fav = serializers.SerializerMethodField()
+    user = RelatedUserSerializer(read_only=True)
+    photos = PhotoSerializer(read_only=True, many=True)
 
     class Meta:
         model = Room
